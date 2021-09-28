@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.4.0",
-    "actions-toolkit": "2.2.0"
+    "actions-toolkit": "6.0.1"
   },
   "devDependencies": {
     "@octokit/rest": "16.28.1",
