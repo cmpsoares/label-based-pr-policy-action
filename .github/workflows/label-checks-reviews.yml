@@ -1,0 +1,16 @@
+# This workflow will set a number or reviewers depending on the tags
+name: Label-based Branch Protection Example
+# Trigger the workflow on pull requests
+on:
+  pull_request:
+
+jobs:
+  require-checks-and-reviewers:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Require-checks-reviewers
+        uses: cmpsoares/label-requires-checks-reviews-action@add-checks
+        env:
+          GITHUB_TOKEN: ${{ secrets.GHA_TEST_PAT}}
