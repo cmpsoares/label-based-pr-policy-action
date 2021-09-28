@@ -1,0 +1,9 @@
+- label: "typescript"
+  reviews: 2
+- label: "example"
+  reviews: 5
+  checks:
+    - build
+- label: "example2"
+  checks:
+    - build
