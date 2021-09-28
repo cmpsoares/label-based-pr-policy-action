@@ -66,14 +66,12 @@ Toolkit.run(async (toolkit: Toolkit) => {
 
   const jobName: String = process.env.GITHUB_JOB
   const headRef: String = process.env.GITHUB_HEAD_REF
-  const initialWait: number =
-    process.env.INITIAL_WAIT != null
-      ? Number.parseInt(process.env.INITIAL_WAIT)
-      : 120
-  const timeout: number =
+  const initialWait: number = 30
+  const timeoutMinutes: number =
     process.env.TIMEOUT != null ? Number.parseInt(process.env.TIMEOUT) : 60
-  const retries: number =
-    process.env.RETRIES != null ? Number.parseInt(process.env.RETRIES) : 5
+  const timeout: number = timeoutMinutes * 60
+  const waitPerCycle: number = 15
+  const retries: number = timeout / waitPerCycle
   const currentSuccesfulChecks: String[] =
     await getListOfCurrentSuccesfulCheckRuns(
       {
@@ -84,7 +82,7 @@ Toolkit.run(async (toolkit: Toolkit) => {
       client,
       jobName,
       initialWait,
-      timeout,
+      waitPerCycle,
       retries
     )
 
@@ -101,6 +99,8 @@ Toolkit.run(async (toolkit: Toolkit) => {
       `Labels require [ ${requiredChecks} ] checks to be succesful but the PR only has [ ${currentSuccesfulChecks} ]`
     )
   }
+  // TODO: Validate checks to be exactly equal
+
   if (!compliant) {
     toolkit.exit.failure(`Check failed due to the above-mentioned reasons.`)
   } else {
