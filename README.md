@@ -72,8 +72,8 @@ TODO: Write contribution guidelines and paste them here.
 This repository is based on the [TravePerk's label-requires-revies-action code (hard fork)](https://github.com/travelperk/label-requires-reviews-action), however as the scope changes significantly and there are some annoyances in maintaining a fork we copied our modified code to this repository. However, its fair to give them the credit they deserve.
 
 #### Contributors
-<a href = "https://github.com/Tanu-N-Prabhu/Python/graphs/contributors">
-  <img src = "https://contrib.rocks/image?repo = cmpsoares/label-based-pr-policy-action"/>
+<a href="https://github.com/cmpsoares/label-based-pr-policy-action/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=cmpsoares/label-based-pr-policy-action" />
 </a>
 
 Made with [contributors-img](https://contrib.rocks).
