@@ -21,7 +21,7 @@ Here is an example:
 With that configuration this check will fail on a Pull Request that has the `typescript` tag until two or more approving reviews have been added. If instead the Pull Request has the `migration` tag it will require five reviews and the check `build` to be succesful. In case both tags are present it will require the highest number of reviews (five) and all the checks to be succesful (in this case `build`).
 
 ### Create workflow
-Create a workflow (eg: `.github/workflows/label-checks-reviews.yml` see [Creating a Workflow file](https://help.github.com/en/articles/configuring-a-workflow#creating-a-workflow-file)) to utilize this action with content:
+Create a workflow (eg: `.github/workflows/label-based-pr-policy.yml` see [Creating a Workflow file](https://help.github.com/en/articles/configuring-a-workflow#creating-a-workflow-file)) to utilize this action with content:
 
 ```yml
 # This workflow will set a number or reviewers depending on the tags
