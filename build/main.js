@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getListOfCurrentSuccesfulCheckRuns = exports.getCurrentReviewCount = exports.findRepositoryInformation = exports.getAllRequiredChecks = exports.getMaxReviewNumber = exports.getRulesForLabels = void 0;
+exports.checkIfRequiredCheckRunsAreSuccesful = exports.getListOfCurrentSuccesfulCheckRuns = exports.getCurrentReviewCount = exports.findRepositoryInformation = exports.getAllRequiredChecks = exports.getMaxReviewNumber = exports.getRulesForLabels = void 0;
 // wait for a sec amount of seconds
 const delay = async (sec) => new Promise((res) => setTimeout(res, sec * 1000));
+//TODO: Change function to read a _default label for default settings when no label is configured
 // Get the maximum number of reviews based on the configuration and the issue labels
 const getRulesForLabels = async (issuesListLabelsOnIssueParams, client, rules) => {
     return client.issues
@@ -56,13 +57,13 @@ const getCurrentReviewCount = async (pullsListReviewsParams, client) => {
 };
 exports.getCurrentReviewCount = getCurrentReviewCount;
 // Get the current status for a specific check from a our pull commit ref
-const getListOfCurrentSuccesfulCheckRuns = async (listCheckRunsForRefParams, client, currentJobName, initialWait = 360, timeout = 60, retries = 10) => {
+const getListOfCurrentSuccesfulCheckRuns = async (listCheckRunsForRefParams, client, currentJobName, initialWait = 360, waitPerCycle = 60, retries = 10) => {
     await delay(initialWait);
     var checkRunsListResponse = await client.checks.listForRef(listCheckRunsForRefParams);
     for (var i = 0; i < retries; i++) {
         if (checkRunsListResponse.data.total_count <= 1 ||
             checkRunsListResponse.data.check_runs.filter((check_run) => check_run.status.match('in_progress') === null).length <= 1) {
-            await delay(timeout);
+            await delay(waitPerCycle);
             checkRunsListResponse = await client.checks.listForRef(listCheckRunsForRefParams);
         }
     }
@@ -78,4 +79,30 @@ const getListOfCurrentSuccesfulCheckRuns = async (listCheckRunsForRefParams, cli
     return successArray;
 };
 exports.getListOfCurrentSuccesfulCheckRuns = getListOfCurrentSuccesfulCheckRuns;
+// Validate if required checks are all succesfull or not
+const checkIfRequiredCheckRunsAreSuccesful = async (listCheckRunsForRefParams, client, currentJobName, requiredChecks, initialWait = 360, waitPerCycle = 60, retries = 10) => {
+    await delay(initialWait);
+    var checkRunsListResponse = await client.checks.listForRef(listCheckRunsForRefParams);
+    var currentHeadSha = checkRunsListResponse.data.check_runs[0].head_sha;
+    //TODO: validate required checkruns
+    for (var i = 0; i < retries; i++) {
+        if ((checkRunsListResponse.data.total_count <= 1 ||
+            checkRunsListResponse.data.check_runs.filter((check_run) => check_run.status.match('in_progress') === null).length <= 1) &&
+            checkRunsListResponse.data.check_runs[0].head_sha == currentHeadSha) {
+            await delay(waitPerCycle);
+            checkRunsListResponse = await client.checks.listForRef(listCheckRunsForRefParams);
+        }
+    }
+    var successArray = [];
+    var checkRunsList = checkRunsListResponse.data.check_runs;
+    checkRunsList.forEach((value) => {
+        if (value.name.match(currentJobName.toString()) === null &&
+            value.status.match('completed') &&
+            value.conclusion.match('success')) {
+            successArray.push(value.name);
+        }
+    });
+    return successArray;
+};
+exports.checkIfRequiredCheckRunsAreSuccesful = checkIfRequiredCheckRunsAreSuccesful;
 //# sourceMappingURL=main.js.map

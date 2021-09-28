@@ -21,30 +21,30 @@ actions_toolkit_1.Toolkit.run(async (toolkit) => {
     if (!process.env.GITHUB_EVENT_PATH) {
         toolkit.exit.failure('Process env GITHUB_EVENT_PATH is undefined');
     }
-    const { owner, issue_number, repo } = main_1.findRepositoryInformation(process.env.GITHUB_EVENT_PATH, toolkit.log, toolkit.exit);
+    const { owner, issue_number, repo } = (0, main_1.findRepositoryInformation)(process.env.GITHUB_EVENT_PATH, toolkit.log, toolkit.exit);
     const client = toolkit.github;
     const ref = toolkit.context.ref;
     toolkit.log.info(`Ref is ${ref}`);
     // Get the list of configuration rules for the labels on the issue
-    const matchingRules = await main_1.getRulesForLabels({ owner, issue_number, repo }, client, rules);
+    const matchingRules = await (0, main_1.getRulesForLabels)({ owner, issue_number, repo }, client, rules);
     toolkit.log.info('Matching rules: ', matchingRules);
     // Get the required number of required reviews from the rules
-    const requiredReviews = main_1.getMaxReviewNumber(matchingRules);
-    const requiredChecks = main_1.getAllRequiredChecks(matchingRules);
+    const requiredReviews = (0, main_1.getMaxReviewNumber)(matchingRules);
+    const requiredChecks = (0, main_1.getAllRequiredChecks)(matchingRules);
     // Get the actual number of reviews from the issue
-    const reviewCount = await main_1.getCurrentReviewCount({ owner, pull_number: issue_number, repo }, client);
+    const reviewCount = await (0, main_1.getCurrentReviewCount)({ owner, pull_number: issue_number, repo }, client);
     const jobName = process.env.GITHUB_JOB;
     const headRef = process.env.GITHUB_HEAD_REF;
-    const initialWait = process.env.INITIAL_WAIT != null
-        ? Number.parseInt(process.env.INITIAL_WAIT)
-        : 120;
-    const timeout = process.env.TIMEOUT != null ? Number.parseInt(process.env.TIMEOUT) : 60;
-    const retries = process.env.RETRIES != null ? Number.parseInt(process.env.RETRIES) : 5;
-    const currentSuccesfulChecks = await main_1.getListOfCurrentSuccesfulCheckRuns({
+    const initialWait = 30;
+    const timeoutMinutes = process.env.TIMEOUT != null ? Number.parseInt(process.env.TIMEOUT) : 60;
+    const timeout = timeoutMinutes * 60;
+    const waitPerCycle = 15;
+    const retries = timeout / waitPerCycle;
+    const currentSuccesfulChecks = await (0, main_1.getListOfCurrentSuccesfulCheckRuns)({
         owner,
         repo,
         ref: headRef,
-    }, client, jobName, initialWait, timeout, retries);
+    }, client, jobName, initialWait, waitPerCycle, retries);
     var compliant = true;
     if (reviewCount < requiredReviews) {
         compliant = false;
@@ -54,6 +54,7 @@ actions_toolkit_1.Toolkit.run(async (toolkit) => {
         compliant = false;
         toolkit.log.fatal(`Labels require [ ${requiredChecks} ] checks to be succesful but the PR only has [ ${currentSuccesfulChecks} ]`);
     }
+    // TODO: Validate checks to be exactly equal
     if (!compliant) {
         toolkit.exit.failure(`Check failed due to the above-mentioned reasons.`);
     }
