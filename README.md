@@ -73,7 +73,9 @@ This repository is based on the [TravePerk's label-requires-revies-action code (
 
 #### Contributors
 So far the following people contributed to this repository. Feel free to join them and contribute!
+
 <a href="https://github.com/cmpsoares/label-based-pr-policy-action/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=cmpsoares/label-based-pr-policy-action" />
 </a>
+
 <sub><sup>Made with [contributors-img](https://contrib.rocks).</sup></sub>
