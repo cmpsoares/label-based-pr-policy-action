@@ -13,6 +13,11 @@ inputs:
     description: 'Number of minutes it keeps trying to validate the checks. After this it exits with the results it has.'
     required: false
     default: '60'
+  initialWait:
+    description: 'Number of seconds it wait in the beginning before starting to check to avoid wasting cycles and time defined in timeOut.'
+    required: false
+    default: '30'
+  
 branding:
   icon: 'git-pull-request'  
   color: 'green'
