@@ -1,15 +1,21 @@
-name: Label requires reviews
-author: TravelPerk <engineering@travelperk.com>
-description: This Github action will require a minimum number of reviews if a label is present.
+name: Label Based PR Policy Action
+author: C.M.P.Soares Lda. <contact@cmpsoares.com>
+description: This Github Action will require a minimum number of reviews and/or specific check-runs are successful if a label is present.
 runs:
   using: 'node12'
   main: 'dist/index.js'
 
 inputs:
-  github_token:
-    description: 'Github token to authenticate Octokit'
-    required: true
+  timeOut:
+    description: 'Number of minutes it keeps trying to validate the checks. After this it exits with the results it has.'
+    required: false
+    default: '60'
+  initialWait:
+    description: 'Number of seconds it wait in the beginning before starting to check to avoid wasting cycles and time defined in timeOut.'
+    required: false
+    default: '30'
+  
 branding:
-  icon: 'user-check'  
+  icon: 'git-pull-request'  
   color: 'green'
 

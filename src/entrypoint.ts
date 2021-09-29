@@ -4,6 +4,7 @@ import {
   getAllRequiredChecks,
   getCurrentReviewCount,
   findRepositoryInformation,
+  checkIfRequiredCheckRunsAreSuccesful,
   getListOfCurrentSuccesfulCheckRuns,
 } from './main'
 import { Toolkit, ToolkitOptions } from 'actions-toolkit'
@@ -67,13 +68,30 @@ Toolkit.run(async (toolkit: Toolkit) => {
   const jobName: String = process.env.GITHUB_JOB
   const headRef: String = process.env.GITHUB_HEAD_REF
   const initialWait: number =
-    process.env.INITIAL_WAIT != null
-      ? Number.parseInt(process.env.INITIAL_WAIT)
-      : 120
-  const timeout: number =
-    process.env.TIMEOUT != null ? Number.parseInt(process.env.TIMEOUT) : 60
-  const retries: number =
-    process.env.RETRIES != null ? Number.parseInt(process.env.RETRIES) : 5
+    process.env.INPUT_INITIALWAIT != null
+      ? Number.parseInt(process.env.INPUT_INITIALWAIT)
+      : 30
+  const timeoutMinutes: number =
+    process.env.INPUT_TIMEOUT != null
+      ? Number.parseInt(process.env.INPUT_TIMEOUT)
+      : 60
+  const timeout: number = timeoutMinutes * 60
+  const waitPerCycle: number = 15
+  const retries: number = timeout / waitPerCycle
+  const checkIfChecksSuccesful: Boolean =
+    await checkIfRequiredCheckRunsAreSuccesful(
+      {
+        owner,
+        repo,
+        ref: headRef,
+      } as ListCheckRunsForRefParams,
+      client,
+      jobName,
+      requiredChecks,
+      initialWait,
+      waitPerCycle,
+      retries
+    )
   const currentSuccesfulChecks: String[] =
     await getListOfCurrentSuccesfulCheckRuns(
       {
@@ -83,9 +101,10 @@ Toolkit.run(async (toolkit: Toolkit) => {
       } as ListCheckRunsForRefParams,
       client,
       jobName,
-      initialWait,
-      timeout,
-      retries
+      requiredChecks,
+      5,
+      10,
+      2
     )
 
   var compliant: boolean = true
@@ -95,17 +114,19 @@ Toolkit.run(async (toolkit: Toolkit) => {
       `Labels require ${requiredReviews} reviews but the PR only has ${reviewCount}`
     )
   }
-  if (currentSuccesfulChecks.length < requiredChecks.length) {
+  if (!checkIfChecksSuccesful) {
     compliant = false
     toolkit.log.fatal(
       `Labels require [ ${requiredChecks} ] checks to be succesful but the PR only has [ ${currentSuccesfulChecks} ]`
     )
   }
+  // TODO: Validate checks to be exactly equal
+
   if (!compliant) {
     toolkit.exit.failure(`Check failed due to the above-mentioned reasons.`)
   } else {
     toolkit.log.info(
-      `Labels require ${requiredReviews} the PR has ${reviewCount}, and requires [ ${requiredChecks} ] checks and has [ ${currentSuccesfulChecks}] checks`
+      `Labels require ${requiredReviews} reviews the PR has ${reviewCount}, and requires the following [ ${requiredChecks} ] checks and has [ ${currentSuccesfulChecks}] checks`
     )
   }
 }, args)

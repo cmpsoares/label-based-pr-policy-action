@@ -1369,9 +1369,10 @@ module.exports = new Type('tag:yaml.org,2002:set', {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getListOfCurrentSuccesfulCheckRuns = exports.getCurrentReviewCount = exports.findRepositoryInformation = exports.getAllRequiredChecks = exports.getMaxReviewNumber = exports.getRulesForLabels = void 0;
+exports.checkIfRequiredCheckRunsAreSuccesful = exports.getListOfCurrentSuccesfulCheckRuns = exports.getCurrentReviewCount = exports.findRepositoryInformation = exports.getAllRequiredChecks = exports.getMaxReviewNumber = exports.getRulesForLabels = void 0;
 // wait for a sec amount of seconds
 const delay = async (sec) => new Promise((res) => setTimeout(res, sec * 1000));
+//TODO: Change function to read a _default label for default settings when no label is configured
 // Get the maximum number of reviews based on the configuration and the issue labels
 const getRulesForLabels = async (issuesListLabelsOnIssueParams, client, rules) => {
     return client.issues
@@ -1425,13 +1426,26 @@ const getCurrentReviewCount = async (pullsListReviewsParams, client) => {
 };
 exports.getCurrentReviewCount = getCurrentReviewCount;
 // Get the current status for a specific check from a our pull commit ref
-const getListOfCurrentSuccesfulCheckRuns = async (listCheckRunsForRefParams, client, currentJobName, initialWait = 360, timeout = 60, retries = 10) => {
+const getListOfCurrentSuccesfulCheckRuns = async (listCheckRunsForRefParams, client, currentJobName, requiredChecks, initialWait = 360, waitPerCycle = 60, retries = 10) => {
     await delay(initialWait);
     var checkRunsListResponse = await client.checks.listForRef(listCheckRunsForRefParams);
+    var currentHeadSha = checkRunsListResponse.data.check_runs[0].head_sha;
     for (var i = 0; i < retries; i++) {
-        if (checkRunsListResponse.data.total_count <= 1 ||
-            checkRunsListResponse.data.check_runs.filter((check_run) => check_run.status.match('in_progress') === null).length <= 1) {
-            await delay(timeout);
+        if ((checkRunsListResponse.data.total_count <= 1 ||
+            checkRunsListResponse.data.check_runs.filter((check_run) => check_run.status.match('in_progress') === null).length <= 1) &&
+            checkRunsListResponse.data.check_runs[0].head_sha == currentHeadSha) {
+            var completedBreakOut = true;
+            requiredChecks.forEach((element) => {
+                checkRunsListResponse.data.check_runs.forEach((check_run) => {
+                    completedBreakOut =
+                        completedBreakOut &&
+                            check_run.name.match(element.toString()) != null &&
+                            check_run.status.match('completed') != null;
+                });
+            });
+            if (completedBreakOut)
+                break;
+            await delay(waitPerCycle);
             checkRunsListResponse = await client.checks.listForRef(listCheckRunsForRefParams);
         }
     }
@@ -1447,6 +1461,13 @@ const getListOfCurrentSuccesfulCheckRuns = async (listCheckRunsForRefParams, cli
     return successArray;
 };
 exports.getListOfCurrentSuccesfulCheckRuns = getListOfCurrentSuccesfulCheckRuns;
+// Validate if required checks are all succesfull or not
+const checkIfRequiredCheckRunsAreSuccesful = async (listCheckRunsForRefParams, client, currentJobName, requiredChecks, initialWait = 360, waitPerCycle = 60, retries = 10) => {
+    var successArray = await (0, exports.getListOfCurrentSuccesfulCheckRuns)(listCheckRunsForRefParams, client, currentJobName, requiredChecks, initialWait, waitPerCycle, retries);
+    var successValidation = requiredChecks.some((requiredCheck) => successArray.includes(requiredCheck));
+    return successValidation;
+};
+exports.checkIfRequiredCheckRunsAreSuccesful = checkIfRequiredCheckRunsAreSuccesful;
 //# sourceMappingURL=main.js.map
 
 /***/ }),
@@ -25541,44 +25562,54 @@ actions_toolkit_1.Toolkit.run(async (toolkit) => {
     if (!process.env.GITHUB_EVENT_PATH) {
         toolkit.exit.failure('Process env GITHUB_EVENT_PATH is undefined');
     }
-    const { owner, issue_number, repo } = main_1.findRepositoryInformation(process.env.GITHUB_EVENT_PATH, toolkit.log, toolkit.exit);
+    const { owner, issue_number, repo } = (0, main_1.findRepositoryInformation)(process.env.GITHUB_EVENT_PATH, toolkit.log, toolkit.exit);
     const client = toolkit.github;
     const ref = toolkit.context.ref;
     toolkit.log.info(`Ref is ${ref}`);
     // Get the list of configuration rules for the labels on the issue
-    const matchingRules = await main_1.getRulesForLabels({ owner, issue_number, repo }, client, rules);
+    const matchingRules = await (0, main_1.getRulesForLabels)({ owner, issue_number, repo }, client, rules);
     toolkit.log.info('Matching rules: ', matchingRules);
     // Get the required number of required reviews from the rules
-    const requiredReviews = main_1.getMaxReviewNumber(matchingRules);
-    const requiredChecks = main_1.getAllRequiredChecks(matchingRules);
+    const requiredReviews = (0, main_1.getMaxReviewNumber)(matchingRules);
+    const requiredChecks = (0, main_1.getAllRequiredChecks)(matchingRules);
     // Get the actual number of reviews from the issue
-    const reviewCount = await main_1.getCurrentReviewCount({ owner, pull_number: issue_number, repo }, client);
+    const reviewCount = await (0, main_1.getCurrentReviewCount)({ owner, pull_number: issue_number, repo }, client);
     const jobName = process.env.GITHUB_JOB;
     const headRef = process.env.GITHUB_HEAD_REF;
-    const initialWait = process.env.INITIAL_WAIT != null
-        ? Number.parseInt(process.env.INITIAL_WAIT)
-        : 120;
-    const timeout = process.env.TIMEOUT != null ? Number.parseInt(process.env.TIMEOUT) : 60;
-    const retries = process.env.RETRIES != null ? Number.parseInt(process.env.RETRIES) : 5;
-    const currentSuccesfulChecks = await main_1.getListOfCurrentSuccesfulCheckRuns({
+    const initialWait = process.env.INPUT_INITIALWAIT != null
+        ? Number.parseInt(process.env.INPUT_INITIALWAIT)
+        : 30;
+    const timeoutMinutes = process.env.INPUT_TIMEOUT != null
+        ? Number.parseInt(process.env.INPUT_TIMEOUT)
+        : 60;
+    const timeout = timeoutMinutes * 60;
+    const waitPerCycle = 15;
+    const retries = timeout / waitPerCycle;
+    const checkIfChecksSuccesful = await (0, main_1.checkIfRequiredCheckRunsAreSuccesful)({
         owner,
         repo,
         ref: headRef,
-    }, client, jobName, initialWait, timeout, retries);
+    }, client, jobName, requiredChecks, initialWait, waitPerCycle, retries);
+    const currentSuccesfulChecks = await (0, main_1.getListOfCurrentSuccesfulCheckRuns)({
+        owner,
+        repo,
+        ref: headRef,
+    }, client, jobName, requiredChecks, 5, 10, 2);
     var compliant = true;
     if (reviewCount < requiredReviews) {
         compliant = false;
         toolkit.log.fatal(`Labels require ${requiredReviews} reviews but the PR only has ${reviewCount}`);
     }
-    if (currentSuccesfulChecks.length < requiredChecks.length) {
+    if (!checkIfChecksSuccesful) {
         compliant = false;
         toolkit.log.fatal(`Labels require [ ${requiredChecks} ] checks to be succesful but the PR only has [ ${currentSuccesfulChecks} ]`);
     }
+    // TODO: Validate checks to be exactly equal
     if (!compliant) {
         toolkit.exit.failure(`Check failed due to the above-mentioned reasons.`);
     }
     else {
-        toolkit.log.info(`Labels require ${requiredReviews} the PR has ${reviewCount}, and requires [ ${requiredChecks} ] checks and has [ ${currentSuccesfulChecks}] checks`);
+        toolkit.log.info(`Labels require ${requiredReviews} reviews the PR has ${reviewCount}, and requires the following [ ${requiredChecks} ] checks and has [ ${currentSuccesfulChecks}] checks`);
     }
 }, args);
 //# sourceMappingURL=entrypoint.js.map

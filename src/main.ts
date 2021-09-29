@@ -20,6 +20,8 @@ import { wait } from './wait'
 const delay = async (sec: number) =>
   new Promise((res) => setTimeout(res, sec * 1000))
 
+//TODO: Change function to read a _default label for default settings when no label is configured
+
 // Get the maximum number of reviews based on the configuration and the issue labels
 export const getRulesForLabels = async (
   issuesListLabelsOnIssueParams: IssuesListLabelsOnIssueParams,
@@ -96,23 +98,37 @@ export const getListOfCurrentSuccesfulCheckRuns = async (
   listCheckRunsForRefParams: ListCheckRunsForRefParams,
   client: GitHub,
   currentJobName: String,
+  requiredChecks: String[],
   initialWait = 360,
-  timeout = 60,
+  waitPerCycle = 60,
   retries = 10
 ): Promise<Array<String>> => {
   await delay(initialWait)
   var checkRunsListResponse = await client.checks.listForRef(
     listCheckRunsForRefParams
   )
+  var currentHeadSha: string = checkRunsListResponse.data.check_runs[0].head_sha
 
   for (var i = 0; i < retries; i++) {
     if (
-      checkRunsListResponse.data.total_count <= 1 ||
-      checkRunsListResponse.data.check_runs.filter(
-        (check_run) => check_run.status.match('in_progress') === null
-      ).length <= 1
+      (checkRunsListResponse.data.total_count <= 1 ||
+        checkRunsListResponse.data.check_runs.filter(
+          (check_run) => check_run.status.match('in_progress') === null
+        ).length <= 1) &&
+      checkRunsListResponse.data.check_runs[0].head_sha == currentHeadSha
     ) {
-      await delay(timeout)
+      var completedBreakOut: boolean = true
+      requiredChecks.forEach((element) => {
+        checkRunsListResponse.data.check_runs.forEach((check_run) => {
+          completedBreakOut =
+            completedBreakOut &&
+            check_run.name.match(element.toString()) != null &&
+            check_run.status.match('completed') != null
+        })
+      })
+      if (completedBreakOut) break
+
+      await delay(waitPerCycle)
       checkRunsListResponse = await client.checks.listForRef(
         listCheckRunsForRefParams
       )
@@ -133,4 +149,30 @@ export const getListOfCurrentSuccesfulCheckRuns = async (
   })
 
   return successArray
+}
+
+// Validate if required checks are all succesfull or not
+export const checkIfRequiredCheckRunsAreSuccesful = async (
+  listCheckRunsForRefParams: ListCheckRunsForRefParams,
+  client: GitHub,
+  currentJobName: String,
+  requiredChecks: String[],
+  initialWait = 360,
+  waitPerCycle = 60,
+  retries = 10
+): Promise<Boolean> => {
+  var successArray: String[] = await getListOfCurrentSuccesfulCheckRuns(
+    listCheckRunsForRefParams,
+    client,
+    currentJobName,
+    requiredChecks,
+    initialWait,
+    waitPerCycle,
+    retries
+  )
+  var successValidation: boolean = requiredChecks.some((requiredCheck) =>
+    successArray.includes(requiredCheck)
+  )
+
+  return successValidation
 }
