@@ -67,7 +67,7 @@ Toolkit.run(async (toolkit: Toolkit) => {
 
   const jobName: String = process.env.GITHUB_JOB
   const headRef: String = process.env.GITHUB_HEAD_REF
-  const initialWait: number = 30
+  const initialWait: number = process.env.INPUT_INITIALWAIT != null ? Number.parseInt(process.env.INPUT_INITIALWAIT) : 30
   const timeoutMinutes: number =
     process.env.INPUT_TIMEOUT != null ? Number.parseInt(process.env.INPUT_TIMEOUT) : 60
   const timeout: number = timeoutMinutes * 60
