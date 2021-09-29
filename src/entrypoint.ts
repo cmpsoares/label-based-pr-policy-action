@@ -4,6 +4,7 @@ import {
   getAllRequiredChecks,
   getCurrentReviewCount,
   findRepositoryInformation,
+  checkIfRequiredCheckRunsAreSuccesful,
   getListOfCurrentSuccesfulCheckRuns,
 } from './main'
 import { Toolkit, ToolkitOptions } from 'actions-toolkit'
@@ -72,6 +73,20 @@ Toolkit.run(async (toolkit: Toolkit) => {
   const timeout: number = timeoutMinutes * 60
   const waitPerCycle: number = 15
   const retries: number = timeout / waitPerCycle
+  const checkIfChecksSuccesful: Boolean =
+    await checkIfRequiredCheckRunsAreSuccesful(
+      {
+        owner,
+        repo,
+        ref: headRef,
+      } as ListCheckRunsForRefParams,
+      client,
+      jobName,
+      requiredChecks,
+      initialWait,
+      waitPerCycle,
+      retries
+    )
   const currentSuccesfulChecks: String[] =
     await getListOfCurrentSuccesfulCheckRuns(
       {
@@ -81,9 +96,10 @@ Toolkit.run(async (toolkit: Toolkit) => {
       } as ListCheckRunsForRefParams,
       client,
       jobName,
-      initialWait,
-      waitPerCycle,
-      retries
+      requiredChecks,
+      5,
+      10,
+      2
     )
 
   var compliant: boolean = true
@@ -93,7 +109,7 @@ Toolkit.run(async (toolkit: Toolkit) => {
       `Labels require ${requiredReviews} reviews but the PR only has ${reviewCount}`
     )
   }
-  if (currentSuccesfulChecks.length < requiredChecks.length) {
+  if (!checkIfChecksSuccesful) {
     compliant = false
     toolkit.log.fatal(
       `Labels require [ ${requiredChecks} ] checks to be succesful but the PR only has [ ${currentSuccesfulChecks} ]`

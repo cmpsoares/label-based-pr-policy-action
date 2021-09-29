@@ -40,17 +40,22 @@ actions_toolkit_1.Toolkit.run(async (toolkit) => {
     const timeout = timeoutMinutes * 60;
     const waitPerCycle = 15;
     const retries = timeout / waitPerCycle;
+    const checkIfChecksSuccesful = await (0, main_1.checkIfRequiredCheckRunsAreSuccesful)({
+        owner,
+        repo,
+        ref: headRef,
+    }, client, jobName, requiredChecks, initialWait, waitPerCycle, retries);
     const currentSuccesfulChecks = await (0, main_1.getListOfCurrentSuccesfulCheckRuns)({
         owner,
         repo,
         ref: headRef,
-    }, client, jobName, initialWait, waitPerCycle, retries);
+    }, client, jobName, requiredChecks, 5, 10, 2);
     var compliant = true;
     if (reviewCount < requiredReviews) {
         compliant = false;
         toolkit.log.fatal(`Labels require ${requiredReviews} reviews but the PR only has ${reviewCount}`);
     }
-    if (currentSuccesfulChecks.length < requiredChecks.length) {
+    if (!checkIfChecksSuccesful) {
         compliant = false;
         toolkit.log.fatal(`Labels require [ ${requiredChecks} ] checks to be succesful but the PR only has [ ${currentSuccesfulChecks} ]`);
     }
