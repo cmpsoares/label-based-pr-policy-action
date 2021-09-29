@@ -9,7 +9,10 @@ inputs:
   github_token:
     description: 'Github token to authenticate Octokit'
     required: true
-# TODO: Create the timeout inputs
+  timeOut:
+    description: 'Number of minutes it keeps trying to validate the checks. After this it exits with the results it has.'
+    required: false
+    default: '60'
 branding:
   icon: 'git-pull-request'  
   color: 'green'
