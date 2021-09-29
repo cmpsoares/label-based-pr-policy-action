@@ -1435,9 +1435,12 @@ const getListOfCurrentSuccesfulCheckRuns = async (listCheckRunsForRefParams, cli
             checkRunsListResponse.data.check_runs.filter((check_run) => check_run.status.match('in_progress') === null).length <= 1) &&
             checkRunsListResponse.data.check_runs[0].head_sha == currentHeadSha) {
             var completedBreakOut = true;
-            requiredChecks.forEach(element => {
-                checkRunsListResponse.data.check_runs.forEach(check_run => {
-                    completedBreakOut = completedBreakOut && (check_run.name.match(element.toString()) != null && check_run.status.match('completed') != null);
+            requiredChecks.forEach((element) => {
+                checkRunsListResponse.data.check_runs.forEach((check_run) => {
+                    completedBreakOut =
+                        completedBreakOut &&
+                            check_run.name.match(element.toString()) != null &&
+                            check_run.status.match('completed') != null;
                 });
             });
             if (completedBreakOut)
@@ -1461,7 +1464,7 @@ exports.getListOfCurrentSuccesfulCheckRuns = getListOfCurrentSuccesfulCheckRuns;
 // Validate if required checks are all succesfull or not
 const checkIfRequiredCheckRunsAreSuccesful = async (listCheckRunsForRefParams, client, currentJobName, requiredChecks, initialWait = 360, waitPerCycle = 60, retries = 10) => {
     var successArray = await (0, exports.getListOfCurrentSuccesfulCheckRuns)(listCheckRunsForRefParams, client, currentJobName, requiredChecks, initialWait, waitPerCycle, retries);
-    var successValidation = requiredChecks.some(requiredCheck => successArray.includes(requiredCheck));
+    var successValidation = requiredChecks.some((requiredCheck) => successArray.includes(requiredCheck));
     return successValidation;
 };
 exports.checkIfRequiredCheckRunsAreSuccesful = checkIfRequiredCheckRunsAreSuccesful;
