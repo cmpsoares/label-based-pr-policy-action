@@ -25605,7 +25605,7 @@ actions_toolkit_1.Toolkit.run(async (toolkit) => {
         toolkit.exit.failure(`Check failed due to the above-mentioned reasons.`);
     }
     else {
-        toolkit.log.info(`Labels require ${requiredReviews} the PR has ${reviewCount}, and requires [ ${requiredChecks} ] checks and has [ ${currentSuccesfulChecks}] checks`);
+        toolkit.log.info(`Labels require ${requiredReviews} reviews the PR has ${reviewCount}, and requires the following [ ${requiredChecks} ] checks and has [ ${currentSuccesfulChecks}] checks`);
     }
 }, args);
 //# sourceMappingURL=entrypoint.js.map
