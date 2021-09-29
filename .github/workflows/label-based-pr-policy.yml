@@ -3,6 +3,8 @@ name: Label-based Branch Protection Example
 # Trigger the workflow on pull requests
 on:
   pull_request:
+    branches:
+      - main
 
 jobs:
   require-checks-and-reviewers:
