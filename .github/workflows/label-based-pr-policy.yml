@@ -13,6 +13,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Require-checks-reviewers
-        uses: cmpsoares/label-requires-checks-reviews-action@add-checks
-        env:
-          GITHUB_TOKEN: ${{ secrets.GHA_DEV_PAT }}
+        uses: cmpsoares/label-based-pr-policy-action@engine-changes
+        with:
+          github_token: ${{ secrets.GHA_DEV_PAT }}
+          initialWait: 10
