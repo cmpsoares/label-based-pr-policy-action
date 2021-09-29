@@ -25550,7 +25550,7 @@ const args = {
         'pull_request_review.dismissed',
         'pull_request.synchronize',
     ],
-    secrets: ['INPUT_GITHUB_TOKEN'],
+    secrets: ['GITHUB_TOKEN'],
 };
 actions_toolkit_1.Toolkit.run(async (toolkit) => {
     var _a;
@@ -25576,8 +25576,12 @@ actions_toolkit_1.Toolkit.run(async (toolkit) => {
     const reviewCount = await (0, main_1.getCurrentReviewCount)({ owner, pull_number: issue_number, repo }, client);
     const jobName = process.env.GITHUB_JOB;
     const headRef = process.env.GITHUB_HEAD_REF;
-    const initialWait = process.env.INPUT_INITIALWAIT != null ? Number.parseInt(process.env.INPUT_INITIALWAIT) : 30;
-    const timeoutMinutes = process.env.INPUT_TIMEOUT != null ? Number.parseInt(process.env.INPUT_TIMEOUT) : 60;
+    const initialWait = process.env.INPUT_INITIALWAIT != null
+        ? Number.parseInt(process.env.INPUT_INITIALWAIT)
+        : 30;
+    const timeoutMinutes = process.env.INPUT_TIMEOUT != null
+        ? Number.parseInt(process.env.INPUT_TIMEOUT)
+        : 60;
     const timeout = timeoutMinutes * 60;
     const waitPerCycle = 15;
     const retries = timeout / waitPerCycle;

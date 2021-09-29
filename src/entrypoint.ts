@@ -23,7 +23,7 @@ const args: ToolkitOptions = {
     'pull_request_review.dismissed',
     'pull_request.synchronize',
   ],
-  secrets: ['INPUT_GITHUB_TOKEN'],
+  secrets: ['GITHUB_TOKEN'],
 }
 
 Toolkit.run(async (toolkit: Toolkit) => {
