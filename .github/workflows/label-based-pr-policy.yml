@@ -13,4 +13,4 @@ jobs:
       - name: Require-checks-reviewers
         uses: cmpsoares/label-requires-checks-reviews-action@add-checks
         env:
-          GITHUB_TOKEN: ${{ secrets.GHA_TEST_PAT}}
+          GITHUB_TOKEN: ${{ secrets.GHA_DEV_PAT}}
