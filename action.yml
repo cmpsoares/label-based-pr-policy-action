@@ -6,9 +6,6 @@ runs:
   main: 'dist/index.js'
 
 inputs:
-  github_token:
-    description: 'Github token to authenticate Octokit'
-    required: true
   timeOut:
     description: 'Number of minutes it keeps trying to validate the checks. After this it exits with the results it has.'
     required: false
