@@ -98,6 +98,7 @@ export const getListOfCurrentSuccesfulCheckRuns = async (
   listCheckRunsForRefParams: ListCheckRunsForRefParams,
   client: GitHub,
   currentJobName: String,
+  requiredChecks: String[],
   initialWait = 360,
   waitPerCycle = 60,
   retries = 10
@@ -106,14 +107,27 @@ export const getListOfCurrentSuccesfulCheckRuns = async (
   var checkRunsListResponse = await client.checks.listForRef(
     listCheckRunsForRefParams
   )
+  var currentHeadSha: string = checkRunsListResponse.data.check_runs[0].head_sha
 
   for (var i = 0; i < retries; i++) {
     if (
-      checkRunsListResponse.data.total_count <= 1 ||
-      checkRunsListResponse.data.check_runs.filter(
-        (check_run) => check_run.status.match('in_progress') === null
-      ).length <= 1
+      (checkRunsListResponse.data.total_count <= 1 ||
+        checkRunsListResponse.data.check_runs.filter(
+          (check_run) => check_run.status.match('in_progress') === null
+        ).length <= 1) &&
+      checkRunsListResponse.data.check_runs[0].head_sha == currentHeadSha
     ) {
+      var completedBreakOut: boolean = true
+      requiredChecks.forEach((element) => {
+        checkRunsListResponse.data.check_runs.forEach((check_run) => {
+          completedBreakOut =
+            completedBreakOut &&
+            check_run.name.match(element.toString()) != null &&
+            check_run.status.match('completed') != null
+        })
+      })
+      if (completedBreakOut) break
+
       await delay(waitPerCycle)
       checkRunsListResponse = await client.checks.listForRef(
         listCheckRunsForRefParams
@@ -146,41 +160,19 @@ export const checkIfRequiredCheckRunsAreSuccesful = async (
   initialWait = 360,
   waitPerCycle = 60,
   retries = 10
-): Promise<Array<String>> => {
-  await delay(initialWait)
-  var checkRunsListResponse = await client.checks.listForRef(
-    listCheckRunsForRefParams
+): Promise<Boolean> => {
+  var successArray: String[] = await getListOfCurrentSuccesfulCheckRuns(
+    listCheckRunsForRefParams,
+    client,
+    currentJobName,
+    requiredChecks,
+    initialWait,
+    waitPerCycle,
+    retries
   )
-  var currentHeadSha: string = checkRunsListResponse.data.check_runs[0].head_sha
+  var successValidation: boolean = requiredChecks.some((requiredCheck) =>
+    successArray.includes(requiredCheck)
+  )
 
-  //TODO: validate required checkruns
-  for (var i = 0; i < retries; i++) {
-    if (
-      (checkRunsListResponse.data.total_count <= 1 ||
-        checkRunsListResponse.data.check_runs.filter(
-          (check_run) => check_run.status.match('in_progress') === null
-        ).length <= 1) &&
-      checkRunsListResponse.data.check_runs[0].head_sha == currentHeadSha
-    ) {
-      await delay(waitPerCycle)
-      checkRunsListResponse = await client.checks.listForRef(
-        listCheckRunsForRefParams
-      )
-    }
-  }
-
-  var successArray: String[] = []
-  var checkRunsList: Array<ChecksListForRefResponseCheckRunsItem> =
-    checkRunsListResponse.data.check_runs
-  checkRunsList.forEach((value) => {
-    if (
-      value.name.match(currentJobName.toString()) === null &&
-      value.status.match('completed') &&
-      value.conclusion.match('success')
-    ) {
-      successArray.push(value.name)
-    }
-  })
-
-  return successArray
+  return successValidation
 }

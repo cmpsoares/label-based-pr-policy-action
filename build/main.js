@@ -57,12 +57,22 @@ const getCurrentReviewCount = async (pullsListReviewsParams, client) => {
 };
 exports.getCurrentReviewCount = getCurrentReviewCount;
 // Get the current status for a specific check from a our pull commit ref
-const getListOfCurrentSuccesfulCheckRuns = async (listCheckRunsForRefParams, client, currentJobName, initialWait = 360, waitPerCycle = 60, retries = 10) => {
+const getListOfCurrentSuccesfulCheckRuns = async (listCheckRunsForRefParams, client, currentJobName, requiredChecks, initialWait = 360, waitPerCycle = 60, retries = 10) => {
     await delay(initialWait);
     var checkRunsListResponse = await client.checks.listForRef(listCheckRunsForRefParams);
+    var currentHeadSha = checkRunsListResponse.data.check_runs[0].head_sha;
     for (var i = 0; i < retries; i++) {
-        if (checkRunsListResponse.data.total_count <= 1 ||
-            checkRunsListResponse.data.check_runs.filter((check_run) => check_run.status.match('in_progress') === null).length <= 1) {
+        if ((checkRunsListResponse.data.total_count <= 1 ||
+            checkRunsListResponse.data.check_runs.filter((check_run) => check_run.status.match('in_progress') === null).length <= 1) &&
+            checkRunsListResponse.data.check_runs[0].head_sha == currentHeadSha) {
+            var completedBreakOut = true;
+            requiredChecks.forEach(element => {
+                checkRunsListResponse.data.check_runs.forEach(check_run => {
+                    completedBreakOut = completedBreakOut && (check_run.name.match(element.toString()) != null && check_run.status.match('completed') != null);
+                });
+            });
+            if (completedBreakOut)
+                break;
             await delay(waitPerCycle);
             checkRunsListResponse = await client.checks.listForRef(listCheckRunsForRefParams);
         }
@@ -81,28 +91,9 @@ const getListOfCurrentSuccesfulCheckRuns = async (listCheckRunsForRefParams, cli
 exports.getListOfCurrentSuccesfulCheckRuns = getListOfCurrentSuccesfulCheckRuns;
 // Validate if required checks are all succesfull or not
 const checkIfRequiredCheckRunsAreSuccesful = async (listCheckRunsForRefParams, client, currentJobName, requiredChecks, initialWait = 360, waitPerCycle = 60, retries = 10) => {
-    await delay(initialWait);
-    var checkRunsListResponse = await client.checks.listForRef(listCheckRunsForRefParams);
-    var currentHeadSha = checkRunsListResponse.data.check_runs[0].head_sha;
-    //TODO: validate required checkruns
-    for (var i = 0; i < retries; i++) {
-        if ((checkRunsListResponse.data.total_count <= 1 ||
-            checkRunsListResponse.data.check_runs.filter((check_run) => check_run.status.match('in_progress') === null).length <= 1) &&
-            checkRunsListResponse.data.check_runs[0].head_sha == currentHeadSha) {
-            await delay(waitPerCycle);
-            checkRunsListResponse = await client.checks.listForRef(listCheckRunsForRefParams);
-        }
-    }
-    var successArray = [];
-    var checkRunsList = checkRunsListResponse.data.check_runs;
-    checkRunsList.forEach((value) => {
-        if (value.name.match(currentJobName.toString()) === null &&
-            value.status.match('completed') &&
-            value.conclusion.match('success')) {
-            successArray.push(value.name);
-        }
-    });
-    return successArray;
+    var successArray = await (0, exports.getListOfCurrentSuccesfulCheckRuns)(listCheckRunsForRefParams, client, currentJobName, requiredChecks, initialWait, waitPerCycle, retries);
+    var successValidation = requiredChecks.some(requiredCheck => successArray.includes(requiredCheck));
+    return successValidation;
 };
 exports.checkIfRequiredCheckRunsAreSuccesful = checkIfRequiredCheckRunsAreSuccesful;
 //# sourceMappingURL=main.js.map
