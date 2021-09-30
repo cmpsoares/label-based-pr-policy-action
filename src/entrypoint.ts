@@ -29,7 +29,7 @@ const args: ToolkitOptions = {
 Toolkit.run(async (toolkit: Toolkit) => {
   toolkit.log.info('Running Action')
   const configPath: string =
-    process.env.CONFIG_PATH ?? '.github/label-requires-checks-reviews.yml'
+  process.env.INPUT_CONFIGPATH ?? '.github/label-requires-checks-reviews.yml'
   const rules: Rule[] = toolkit.config(configPath)
   toolkit.log.info('Configured rules: ', rules)
 
