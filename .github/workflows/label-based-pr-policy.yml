@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Require-checks-reviewers
+      - name: label-based-pr-policy-action
         uses: cmpsoares/label-based-pr-policy-action@main
         env:
           GITHUB_TOKEN: ${{ secrets.GHA_DEV_PAT }}
