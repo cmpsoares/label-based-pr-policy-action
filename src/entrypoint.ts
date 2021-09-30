@@ -29,7 +29,7 @@ const args: ToolkitOptions = {
 Toolkit.run(async (toolkit: Toolkit) => {
   toolkit.log.info('Running Action')
   const configPath: string =
-  process.env.INPUT_CONFIGPATH ?? '.github/label-requires-checks-reviews.yml'
+    process.env.INPUT_CONFIGPATH ?? '.github/label-requires-checks-reviews.yml'
   const rules: Rule[] = toolkit.config(configPath)
   toolkit.log.info('Configured rules: ', rules)
 
@@ -45,7 +45,6 @@ Toolkit.run(async (toolkit: Toolkit) => {
     )
   const client: GitHub = toolkit.github
   const ref: String = toolkit.context.ref
-  toolkit.log.info(`Ref is ${ref}`)
 
   // Get the list of configuration rules for the labels on the issue
   const matchingRules: Rule[] = await getRulesForLabels(
@@ -120,7 +119,6 @@ Toolkit.run(async (toolkit: Toolkit) => {
       `Labels require [ ${requiredChecks} ] checks to be succesful but the PR only has [ ${currentSuccesfulChecks} ]`
     )
   }
-  // TODO: Validate checks to be exactly equal
 
   if (!compliant) {
     toolkit.exit.failure(`Check failed due to the above-mentioned reasons.`)
