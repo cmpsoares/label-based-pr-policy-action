@@ -28,7 +28,7 @@ export const getRulesForLabels = async (
   client,
   rules: Rule[]
 ): Promise<Rule[]> => {
-  return client.issues
+  var finalRules = client.issues
     .listLabelsOnIssue(issuesListLabelsOnIssueParams)
     .then(({ data: labels }: IssuesListLabelsOnIssueResponse) => {
       return labels.reduce((acc, label) => acc.concat(label.name), [])
@@ -36,6 +36,11 @@ export const getRulesForLabels = async (
     .then((issueLabels: string[]) =>
       rules.filter((rule) => issueLabels.includes(rule.label))
     )
+  if (typeof finalRules === 'undefined' || finalRules.length == 0) {
+    finalRules = rules.filter((rule) => rule.label.match('_default_') !== null)
+  }
+
+  return finalRules
 }
 
 // Get the maximum number of reviews based on the configuration and the issue labels
