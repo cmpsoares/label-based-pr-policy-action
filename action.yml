@@ -6,6 +6,10 @@ runs:
   main: 'dist/index.js'
 
 inputs:
+  configPath:
+    description: 'Path to the configuration file.'
+    required: false
+    default: '.github/label-requires-checks-reviews.yml'
   timeOut:
     description: 'Number of minutes it keeps trying to validate the checks. After this it exits with the results it has.'
     required: false

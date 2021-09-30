@@ -5,7 +5,10 @@ This is a Github Action that validates the required minimum number of approving 
 
 ### Create `.github/label-requires-checks-reviews.yml`
 
-Create a `.github/label-requires-checks-reviews.yml` file containing the pairs of `label` and `reviews`. `label` is the name of the label that will be checked on the Pull Request and `reviews` the number of approved reviews needed on the Pull Request for the action to return a success value. In case of having several matching tags the highest number will apply.
+Create a `.github/label-requires-checks-reviews.yml` file (if, for some reason, it requires a different file name you can overwrite this value by setting the `configPath` action input) containing a list of the following configurations:
+ * `label` is the name of the label that will be checked on the Pull Request.
+ * `reviews` the number of approved reviews needed on the Pull Request for the action to return a success value. In case of having several matching tags the highest number will apply.
+ * `checks`is the list of names for the successful check-runs needed on the Pull Request for the action to return a success value. In case of having several matching tags it'll require all of them.
 
 Here is an example:
 
