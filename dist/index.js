@@ -1370,17 +1370,21 @@ module.exports = new Type('tag:yaml.org,2002:set', {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkIfRequiredCheckRunsAreSuccesful = exports.getListOfCurrentSuccesfulCheckRuns = exports.getCurrentReviewCount = exports.findRepositoryInformation = exports.getAllRequiredChecks = exports.getMaxReviewNumber = exports.getRulesForLabels = void 0;
+const DEFAULT_LABEL = '_default_';
 // wait for a sec amount of seconds
 const delay = async (sec) => new Promise((res) => setTimeout(res, sec * 1000));
-//TODO: Change function to read a _default label for default settings when no label is configured
 // Get the maximum number of reviews based on the configuration and the issue labels
 const getRulesForLabels = async (issuesListLabelsOnIssueParams, client, rules) => {
-    return client.issues
+    var finalRules = await client.issues
         .listLabelsOnIssue(issuesListLabelsOnIssueParams)
         .then(({ data: labels }) => {
         return labels.reduce((acc, label) => acc.concat(label.name), []);
     })
         .then((issueLabels) => rules.filter((rule) => issueLabels.includes(rule.label)));
+    if (finalRules.length == 0 || finalRules === null) {
+        finalRules = rules.filter((rule) => rule.label.match(DEFAULT_LABEL) !== null);
+    }
+    return finalRules;
 };
 exports.getRulesForLabels = getRulesForLabels;
 // Get the maximum number of reviews based on the configuration and the issue labels
@@ -25555,7 +25559,7 @@ const args = {
 actions_toolkit_1.Toolkit.run(async (toolkit) => {
     var _a;
     toolkit.log.info('Running Action');
-    const configPath = (_a = process.env.CONFIG_PATH) !== null && _a !== void 0 ? _a : '.github/label-requires-checks-reviews.yml';
+    const configPath = (_a = process.env.INPUT_CONFIGPATH) !== null && _a !== void 0 ? _a : '.github/label-requires-checks-reviews.yml';
     const rules = toolkit.config(configPath);
     toolkit.log.info('Configured rules: ', rules);
     // Get the repository information
@@ -25565,7 +25569,6 @@ actions_toolkit_1.Toolkit.run(async (toolkit) => {
     const { owner, issue_number, repo } = (0, main_1.findRepositoryInformation)(process.env.GITHUB_EVENT_PATH, toolkit.log, toolkit.exit);
     const client = toolkit.github;
     const ref = toolkit.context.ref;
-    toolkit.log.info(`Ref is ${ref}`);
     // Get the list of configuration rules for the labels on the issue
     const matchingRules = await (0, main_1.getRulesForLabels)({ owner, issue_number, repo }, client, rules);
     toolkit.log.info('Matching rules: ', matchingRules);
@@ -25604,7 +25607,6 @@ actions_toolkit_1.Toolkit.run(async (toolkit) => {
         compliant = false;
         toolkit.log.fatal(`Labels require [ ${requiredChecks} ] checks to be succesful but the PR only has [ ${currentSuccesfulChecks} ]`);
     }
-    // TODO: Validate checks to be exactly equal
     if (!compliant) {
         toolkit.exit.failure(`Check failed due to the above-mentioned reasons.`);
     }

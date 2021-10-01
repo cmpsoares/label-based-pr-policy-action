@@ -13,6 +13,7 @@ import {
 const MIGRATION_RULE: Rule = { label: "migration", reviews: 2 }
 const TYPESCRIPT_RULE: Rule = { label: "typescript", reviews: 6, checks: ["build"] }
 const INFRASTRUCTURE_RULE: Rule = { label: "infrastructure", reviews: 6, checks: ["build", "test", "deploy"] }
+const DEFAULT_RULE: Rule = { label: "_default_", reviews: 1, checks: ["build"] }
 const LIST_LABELS_PARAMS: IssuesListLabelsOnIssueParams = {
     owner: 'cmpsoares',
     issue_number: 1,
@@ -48,13 +49,19 @@ describe('getRulesForLabels', () => {
   it('should return empty array if no matching rule',
       async () => expect(
           await getRulesForLabels(LIST_LABELS_PARAMS, client, [TYPESCRIPT_RULE])
-          ).toStrictEqual([])
+        ).toStrictEqual([])
   )
 
   it('should get the matching rules for the Pull Request labels',
       async () => expect(
           await getRulesForLabels(LIST_LABELS_PARAMS, client, [TYPESCRIPT_RULE, MIGRATION_RULE])
-      ).toStrictEqual([MIGRATION_RULE])
+        ).toStrictEqual([MIGRATION_RULE])
+  )
+
+  it('should return default rule if no matching rule but _default_ is defined',
+      async () => expect(
+          await getRulesForLabels(LIST_LABELS_PARAMS, client, [DEFAULT_RULE])
+        ).toStrictEqual([DEFAULT_RULE])
   )
 })
 
