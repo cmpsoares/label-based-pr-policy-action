@@ -1373,7 +1373,6 @@ exports.checkIfRequiredCheckRunsAreSuccesful = exports.getListOfCurrentSuccesful
 const DEFAULT_LABEL = '_default_';
 // wait for a sec amount of seconds
 const delay = async (sec) => new Promise((res) => setTimeout(res, sec * 1000));
-//TODO: Change function to read a _default label for default settings when no label is configured
 // Get the maximum number of reviews based on the configuration and the issue labels
 const getRulesForLabels = async (issuesListLabelsOnIssueParams, client, rules) => {
     var finalRules = await client.issues

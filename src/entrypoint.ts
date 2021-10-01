@@ -44,7 +44,7 @@ Toolkit.run(async (toolkit: Toolkit) => {
       toolkit.exit
     )
   const client: GitHub = toolkit.github
-  const ref: String = toolkit.context.ref
+  const ref: string = toolkit.context.ref
 
   // Get the list of configuration rules for the labels on the issue
   const matchingRules: Rule[] = await getRulesForLabels(
@@ -56,7 +56,7 @@ Toolkit.run(async (toolkit: Toolkit) => {
 
   // Get the required number of required reviews from the rules
   const requiredReviews: number = getMaxReviewNumber(matchingRules)
-  const requiredChecks: String[] = getAllRequiredChecks(matchingRules)
+  const requiredChecks: string[] = getAllRequiredChecks(matchingRules)
 
   // Get the actual number of reviews from the issue
   const reviewCount: number = await getCurrentReviewCount(
@@ -64,8 +64,8 @@ Toolkit.run(async (toolkit: Toolkit) => {
     client
   )
 
-  const jobName: String = process.env.GITHUB_JOB
-  const headRef: String = process.env.GITHUB_HEAD_REF
+  const jobName: string = process.env.GITHUB_JOB
+  const headRef: string = process.env.GITHUB_HEAD_REF
   const initialWait: number =
     process.env.INPUT_INITIALWAIT != null
       ? Number.parseInt(process.env.INPUT_INITIALWAIT)
@@ -77,7 +77,7 @@ Toolkit.run(async (toolkit: Toolkit) => {
   const timeout: number = timeoutMinutes * 60
   const waitPerCycle: number = 15
   const retries: number = timeout / waitPerCycle
-  const checkIfChecksSuccesful: Boolean =
+  const checkIfChecksSuccesful: boolean =
     await checkIfRequiredCheckRunsAreSuccesful(
       {
         owner,
@@ -91,7 +91,7 @@ Toolkit.run(async (toolkit: Toolkit) => {
       waitPerCycle,
       retries
     )
-  const currentSuccesfulChecks: String[] =
+  const currentSuccesfulChecks: string[] =
     await getListOfCurrentSuccesfulCheckRuns(
       {
         owner,

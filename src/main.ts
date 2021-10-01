@@ -1,8 +1,5 @@
-import Octokit, { ChecksListForRefResponseCheckRunsItem } from '@octokit/rest'
-import {
-  Context,
-  WebhookPayloadWithRepository,
-} from 'actions-toolkit/lib/context'
+import { ChecksListForRefResponseCheckRunsItem } from '@octokit/rest'
+import { WebhookPayloadWithRepository } from 'actions-toolkit/lib/context'
 import { Exit } from 'actions-toolkit/lib/exit'
 import { GitHub } from 'actions-toolkit/lib/github'
 import { LoggerFunc, Signale } from 'signale'
@@ -18,8 +15,6 @@ const DEFAULT_LABEL: string = '_default_'
 // wait for a sec amount of seconds
 const delay = async (sec: number) =>
   new Promise((res) => setTimeout(res, sec * 1000))
-
-//TODO: Change function to read a _default label for default settings when no label is configured
 
 // Get the maximum number of reviews based on the configuration and the issue labels
 export const getRulesForLabels = async (
@@ -49,8 +44,8 @@ export const getRulesForLabels = async (
 export const getMaxReviewNumber = (rules: Rule[]): number =>
   rules.reduce((acc, rule) => (rule.reviews > acc ? rule.reviews : acc), 0)
 
-export const getAllRequiredChecks = (rules: Rule[]): String[] => {
-  var requiredChecks: String[]
+export const getAllRequiredChecks = (rules: Rule[]): string[] => {
+  var requiredChecks: string[]
   requiredChecks = []
   rules.forEach(function (rule) {
     if (typeof rule.checks !== 'undefined' && rule.checks.length > 0) {
@@ -104,12 +99,12 @@ export const getCurrentReviewCount = async (
 export const getListOfCurrentSuccesfulCheckRuns = async (
   listCheckRunsForRefParams: ListCheckRunsForRefParams,
   client: GitHub,
-  currentJobName: String,
-  requiredChecks: String[],
+  currentJobName: string,
+  requiredChecks: string[],
   initialWait = 360,
   waitPerCycle = 60,
   retries = 10
-): Promise<Array<String>> => {
+): Promise<Array<string>> => {
   await delay(initialWait)
   var checkRunsListResponse = await client.checks.listForRef(
     listCheckRunsForRefParams
@@ -142,7 +137,7 @@ export const getListOfCurrentSuccesfulCheckRuns = async (
     }
   }
 
-  var successArray: String[] = []
+  var successArray: string[] = []
   var checkRunsList: Array<ChecksListForRefResponseCheckRunsItem> =
     checkRunsListResponse.data.check_runs
   checkRunsList.forEach((value) => {
@@ -162,13 +157,13 @@ export const getListOfCurrentSuccesfulCheckRuns = async (
 export const checkIfRequiredCheckRunsAreSuccesful = async (
   listCheckRunsForRefParams: ListCheckRunsForRefParams,
   client: GitHub,
-  currentJobName: String,
-  requiredChecks: String[],
+  currentJobName: string,
+  requiredChecks: string[],
   initialWait = 360,
   waitPerCycle = 60,
   retries = 10
-): Promise<Boolean> => {
-  var successArray: String[] = await getListOfCurrentSuccesfulCheckRuns(
+): Promise<boolean> => {
+  var successArray: string[] = await getListOfCurrentSuccesfulCheckRuns(
     listCheckRunsForRefParams,
     client,
     currentJobName,
