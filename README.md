@@ -68,7 +68,7 @@ You can avoid checking out the code and running this action if you know the issu
 The drawback is that the list of labels will be duplicated, but you can save a lot of actions time.
 
 ### Contribution
-TODO: Write contribution guidelines and paste them here.
+Please check our company's [contribution guidelines](https://github.com/cmpsoares/DOCUMENTATION/blob/main/Guidelines/CONTRIBUTING.md) for more information
 
 #### Hard Fork
 This repository is based on the [TravePerk's label-requires-revies-action code (hard fork)](https://github.com/travelperk/label-requires-reviews-action), however as the scope changes significantly and there are some annoyances in maintaining a fork we copied our modified code to this repository. However, its fair to give them the credit they deserve.
