@@ -1,5 +1,5 @@
 # Label Based PR Policy Action [![Building the Code](https://github.com/cmpsoares/label-based-pr-policy-action/actions/workflows/build.yml/badge.svg)](https://github.com/cmpsoares/label-based-pr-policy-action/actions/workflows/build.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=cmpsoares_label-based-pr-policy-action&metric=alert_status)](https://sonarcloud.io/dashboard?id=cmpsoares_label-based-pr-policy-action) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=cmpsoares_label-based-pr-policy-action&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=cmpsoares_label-based-pr-policy-action) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=cmpsoares_label-based-pr-policy-action&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=cmpsoares_label-based-pr-policy-action) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=cmpsoares_label-based-pr-policy-action&metric=security_rating)](https://sonarcloud.io/dashboard?id=cmpsoares_label-based-pr-policy-action) [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=cmpsoares_label-based-pr-policy-action&metric=sqale_index)](https://sonarcloud.io/dashboard?id=cmpsoares_label-based-pr-policy-action) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=cmpsoares_label-based-pr-policy-action&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=cmpsoares_label-based-pr-policy-action)
-This is a Github Action that validates the required minimum number of approving reviews and/or Check-runs on a Pull Request depending on the set of labels applied to it.
+This is a Github Action that validates the required minimum number of approving reviews and/or Check-runs on a Pull Request depending on the set of labels applied to it, or alternatively on the default values.
 
 ## Usage
 
@@ -71,7 +71,7 @@ The drawback is that the list of labels will be duplicated, but you can save a l
 Please check our company's [contribution guidelines](https://github.com/cmpsoares/DOCUMENTATION/blob/main/Guidelines/CONTRIBUTING.md) for more information.
 
 #### Hard Fork
-This repository is based on the [TravePerk's label-requires-revies-action code (hard fork)](https://github.com/travelperk/label-requires-reviews-action), however as the scope changes significantly and there are some annoyances in maintaining a fork we copied our modified code to this repository. However, its fair to give them the credit they deserve.
+This repository was initially based on [TravePerk's label-requires-revies-action code (hard fork)](https://github.com/travelperk/label-requires-reviews-action), however as the scope changed significantly and there were some annoyances in maintaining a fork we copied our modified code to this repository. However, its fair to give them the credit they deserve.
 
 #### Contributors
 So far the following people contributed to this repository. Feel free to join them and contribute!
