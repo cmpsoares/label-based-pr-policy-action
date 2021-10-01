@@ -7,3 +7,7 @@
 - label: "example2"
   checks:
     - build
+- label: "_default_"
+  reviews: 2
+  checks:
+    - build
