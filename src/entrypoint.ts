@@ -44,7 +44,6 @@ Toolkit.run(async (toolkit: Toolkit) => {
       toolkit.exit
     )
   const client: GitHub = toolkit.github
-  const ref: string = toolkit.context.ref
 
   // Get the list of configuration rules for the labels on the issue
   const matchingRules: Rule[] = await getRulesForLabels(
