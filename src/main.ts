@@ -14,8 +14,7 @@ import {
   PullsListReviewsResponse,
   ListCheckRunsForRefParams,
 } from './types'
-import { wait } from './wait'
-
+const DEFAULT_LABEL: string = '_default_'
 // wait for a sec amount of seconds
 const delay = async (sec: number) =>
   new Promise((res) => setTimeout(res, sec * 1000))
@@ -28,7 +27,7 @@ export const getRulesForLabels = async (
   client,
   rules: Rule[]
 ): Promise<Rule[]> => {
-  var finalRules = client.issues
+  var finalRules: Rule[] = await client.issues
     .listLabelsOnIssue(issuesListLabelsOnIssueParams)
     .then(({ data: labels }: IssuesListLabelsOnIssueResponse) => {
       return labels.reduce((acc, label) => acc.concat(label.name), [])
@@ -36,8 +35,11 @@ export const getRulesForLabels = async (
     .then((issueLabels: string[]) =>
       rules.filter((rule) => issueLabels.includes(rule.label))
     )
-  if (typeof finalRules === 'undefined' || finalRules.length == 0) {
-    finalRules = rules.filter((rule) => rule.label.match('_default_') !== null)
+
+  if (finalRules.length == 0 || finalRules === null) {
+    finalRules = rules.filter(
+      (rule) => rule.label.match(DEFAULT_LABEL) !== null
+    )
   }
 
   return finalRules

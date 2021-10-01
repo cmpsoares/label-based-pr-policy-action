@@ -1370,19 +1370,20 @@ module.exports = new Type('tag:yaml.org,2002:set', {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkIfRequiredCheckRunsAreSuccesful = exports.getListOfCurrentSuccesfulCheckRuns = exports.getCurrentReviewCount = exports.findRepositoryInformation = exports.getAllRequiredChecks = exports.getMaxReviewNumber = exports.getRulesForLabels = void 0;
+const DEFAULT_LABEL = '_default_';
 // wait for a sec amount of seconds
 const delay = async (sec) => new Promise((res) => setTimeout(res, sec * 1000));
 //TODO: Change function to read a _default label for default settings when no label is configured
 // Get the maximum number of reviews based on the configuration and the issue labels
 const getRulesForLabels = async (issuesListLabelsOnIssueParams, client, rules) => {
-    var finalRules = client.issues
+    var finalRules = await client.issues
         .listLabelsOnIssue(issuesListLabelsOnIssueParams)
         .then(({ data: labels }) => {
         return labels.reduce((acc, label) => acc.concat(label.name), []);
     })
         .then((issueLabels) => rules.filter((rule) => issueLabels.includes(rule.label)));
-    if (typeof finalRules === 'undefined' || finalRules.length == 0) {
-        finalRules = rules.filter((rule) => rule.label.match('_default_') !== null);
+    if (finalRules.length == 0 || finalRules === null) {
+        finalRules = rules.filter((rule) => rule.label.match(DEFAULT_LABEL) !== null);
     }
     return finalRules;
 };
