@@ -54,11 +54,11 @@ In order for the workflow to be able to perform actions on the Pull Request you'
 ### Enforce the requirement
 To make this check mandatory you need to specify it on the `Branch protection rule` section of the repository settings like the example:
 
-![Marking the action as required](https://user-images.githubusercontent.com/1571416/86369067-3d62ae80-bc7e-11ea-9b40-7c518e6c8a80.png)
+![Marking the action as required](https://user-images.githubusercontent.com/4914211/135680396-b66235d5-6b74-45c6-a6a7-e9b09f1c1b64.png)
 
 According to this configuration, the `main` branch is protected by the option `Required approving reviews` set to `1`. That means that any Pull Request that wants to merge code into master would have to be approved by at least one reviewer.
 
-By checking `Require status checks to pass before merging` and `require-reviewers` anytime the Pull Request gets a new review this action will fire and the Pull Request is labeled with one of the labels that require more than one approving review blocking the possibility of merging until this label required number of approving reviews is reached.
+By checking `Require status checks to pass before merging` and `require-checks-and-reviewers` anytime the Pull Request gets a new review this action will fire and the Pull Request is labeled with one of the labels that require more than one approving review blocking the possibility of merging until this label required number of approving reviews is reached.
 
 ### Saving tip
 Since Github Workflow [jobs can have conditionals](https://github.blog/changelog/2019-10-01-github-actions-new-workflow-syntax-features/), and in the workflow you can [directly access some action metadata](https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#contexts).
@@ -68,7 +68,7 @@ You can avoid checking out the code and running this action if you know the issu
 The drawback is that the list of labels will be duplicated, but you can save a lot of actions time.
 
 ### Contribution
-Please check our company's [contribution guidelines](https://github.com/cmpsoares/DOCUMENTATION/blob/main/Guidelines/CONTRIBUTING.md) for more information
+Please check our company's [contribution guidelines](https://github.com/cmpsoares/DOCUMENTATION/blob/main/Guidelines/CONTRIBUTING.md) for more information.
 
 #### Hard Fork
 This repository is based on the [TravePerk's label-requires-revies-action code (hard fork)](https://github.com/travelperk/label-requires-reviews-action), however as the scope changes significantly and there are some annoyances in maintaining a fork we copied our modified code to this repository. However, its fair to give them the credit they deserve.
