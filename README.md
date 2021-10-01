@@ -19,6 +19,10 @@ Here is an example:
   reviews: 5
   checks:
     - build
+- label: "_default_"
+  reviews: 1
+  checks:
+    - build
 ```
 
 With that configuration this check will fail on a Pull Request that has the `typescript` tag until two or more approving reviews have been added. If instead the Pull Request has the `migration` tag it will require five reviews and the check `build` to be succesful. In case both tags are present it will require the highest number of reviews (five) and all the checks to be succesful (in this case `build`).
@@ -27,25 +31,20 @@ With that configuration this check will fail on a Pull Request that has the `typ
 Create a workflow (eg: `.github/workflows/label-based-pr-policy.yml` see [Creating a Workflow file](https://help.github.com/en/articles/configuring-a-workflow#creating-a-workflow-file)) to utilize this action with content:
 
 ```yml
-# This workflow will set a number or reviewers depending on the tags
-name: Label Reviews
+# This workflow will set a number of reviewers and mandatory checks depending on the tags
+name: Label-based Branch Protection Example
 # Trigger the workflow on pull requests
 on:
-  pull_request_review:
-    types:
-      - submitted
-      - edited
-      - dismissed
+  pull_request:
+
 jobs:
   require-checks-and-reviewers:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: main
 
-      - name: Require-reviewers
-        uses: cmpsoares/label-requires-checks-reviews-action@v0.1
+      - name: label-based-pr-policy-action
+        uses: cmpsoares/label-based-pr-policy-action@main
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN}}
 ```
