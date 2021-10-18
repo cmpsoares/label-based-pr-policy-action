@@ -25553,6 +25553,7 @@ const args = {
         'pull_request_review.edited',
         'pull_request_review.dismissed',
         'pull_request.synchronize',
+        'pull_request.opened',
     ],
     secrets: ['GITHUB_TOKEN'],
 };
@@ -25568,7 +25569,6 @@ actions_toolkit_1.Toolkit.run(async (toolkit) => {
     }
     const { owner, issue_number, repo } = (0, main_1.findRepositoryInformation)(process.env.GITHUB_EVENT_PATH, toolkit.log, toolkit.exit);
     const client = toolkit.github;
-    const ref = toolkit.context.ref;
     // Get the list of configuration rules for the labels on the issue
     const matchingRules = await (0, main_1.getRulesForLabels)({ owner, issue_number, repo }, client, rules);
     toolkit.log.info('Matching rules: ', matchingRules);
