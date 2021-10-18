@@ -22,6 +22,7 @@ const args: ToolkitOptions = {
     'pull_request_review.edited',
     'pull_request_review.dismissed',
     'pull_request.synchronize',
+    'pull_request.opened',
   ],
   secrets: ['GITHUB_TOKEN'],
 }
