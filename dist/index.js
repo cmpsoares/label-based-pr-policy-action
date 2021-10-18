@@ -25554,6 +25554,8 @@ const args = {
         'pull_request_review.dismissed',
         'pull_request.synchronize',
         'pull_request.opened',
+        'pull_request_target.synchronize',
+        'pull_request_target.opened',
     ],
     secrets: ['GITHUB_TOKEN'],
 };
