@@ -8,6 +8,6 @@
   checks:
     - build
 - label: "_default_"
-  reviews: 2
+  reviews: 1
   checks:
     - build
